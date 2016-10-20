@@ -1,0 +1,12 @@
+#No entrarán bajo el sistema de control de versiones todos los archivos:
+#acabados en ~
+*~
+
+#con extensión .o
+*.o
+
+#con extensión .class
+*.class
+
+#con extensión .tgz
+*.tgz
