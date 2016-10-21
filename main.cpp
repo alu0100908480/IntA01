@@ -1,11 +1,13 @@
 #include "LOpenGL.h"
 #include "tablero.h"
-#include "helper.h"
+#include "car.h"
 
 const int SCREEN_WIDTH = 1024;
 const int SCREEN_HEIGHT = 768;
 const int SCREEN_FPS = 60;
-tablero* entorno;
+
+tablero* entorno;   // declaramos el tablero y el coche
+car* coche;
 
 void init_entorno(int &, int &, float &);
 void runMainLoop(int);
@@ -19,7 +21,8 @@ int main(int argc, char *argv[]) {
 
 
   init_entorno(altura, profundidad, ratio);
-  entorno = new tablero(altura, profundidad, ratio);
+  coche = new car(altura,profundidad);
+  entorno = new tablero(altura, profundidad, ratio, coche->get_pos());
   entorno->print();
 
   glutInit( &argc, argv ); //Inicializamos freeglut
@@ -58,9 +61,8 @@ void init_entorno(int &n, int &m, float &ratio){
 }
 
 void runMainLoop(int val){
-  update();
   render();
-
+  update();
   glutTimerFunc( 1000 / SCREEN_FPS, runMainLoop, val );  //hacemos otra llamada 1/60 seg para tener los 60 fps
 }
 
@@ -92,7 +94,6 @@ bool initGL(){
 }
 
 void update(){
-
 }
 
 void render(void){
@@ -122,14 +123,14 @@ void render(void){
 
     //Lineas verticales
     for(GLfloat i = 0.0f; i < z; i += 1.0f){
-        glVertex3f(i, 0.0f, 0.0f);
-        glVertex3f(i, 0.0f, -1 * z);
+        glVertex3f(0.0f, 0.0f,-1 * i);
+        glVertex3f(x, 0.0f, -1 * i);
     }
 
     //Lineas horizontales
     for(GLfloat j = 0.0f; j > -x; j -= 1.0f){
-        glVertex3f(0.0f, 0.0f, j);
-        glVertex3f(x, 0.0f, j);
+        glVertex3f(-1 *j, 0.0f, 0.0f);
+        glVertex3f(-1 *j, 0.0f, -1 * z);
     }
 
     glEnd(); // tenemos un grid redimensionable de cuadros de 1 x 1.
@@ -141,17 +142,64 @@ void render(void){
 
     for(int k = 0; k < entorno->get_vec().size(); k++){
       std::vector<int> vect = entorno->get_vec();
-      int dummy = entorno->get_n() * entorno->get_m();
-      int i = vect[k]/entorno->get_n() +1;
-      int j = vect[k] - (vect[k]/entorno->get_n() * entorno->get_m()) +1;
+      int dummy = entorno->get_m() * entorno->get_n();
+      int j = vect[k]/entorno->get_m() +1;
+      int i = vect[k] - (j-1) * entorno->get_n() +1;
 
       glColor3f(0.0f, 1.0f, 1.0f);
       glNormal3f(0.0f, 1.0f, 0.0f);
-      glVertex3f(i-1, 0.0f, -1 * (j - 1));
+      glVertex3f(i-1, 0.0f, -1 * (j-1));
       glVertex3f(i-1, 0.0f, -1 * j);
       glVertex3f(i, 0.0f, -1 * j);
-      glVertex3f(i, 0.0f, -1 * (j - 1));
+      glVertex3f(i, 0.0f, -1 * (j-1));
     }
+
+    std::vector<int> dummy = coche->get_pos();
+    int i = dummy[0];
+    int j = dummy[1];
+    glColor3f(1.0f, 0.2f, 0.0f);
+
+    //cara abajo
+    glNormal3f(0, -1, 0);
+    glVertex3f(i-1,   0, -1 * (j - 1)  );
+    glVertex3f(i-1,   0, -1 * j        );
+    glVertex3f(i  ,   0, -1 * j        );
+    glVertex3f(i  ,   0, -1 * (j - 1)  );
+
+    //cara arriba
+    glNormal3f(0, 1, 0);
+    glVertex3f(i-1, 1,  -1 * (j-1)     );
+    glVertex3f(i-1, 1,  -1 * j         );
+    glVertex3f(i,   1,  -1 * j         );
+    glVertex3f(i,   1,  -1 * (j-1)     );
+
+    //cara izquierda
+    glNormal3f(-1, 0, 0);
+    glVertex3f(i-1,   0,  -1 * (j-1) );
+    glVertex3f(i-1,   1,  -1 * (j-1) );
+    glVertex3f(i-1,   1,  -1 * j     );
+    glVertex3f(i-1,   0,  -1 * j     );
+
+    //cara frontal
+    glNormal3f(0, 0, 1);
+    glVertex3f(i,     0,  -1 * (j-1) );
+    glVertex3f(i,     1,  -1 * (j-1) );
+    glVertex3f(i-1,   1,  -1 * (j-1) );
+    glVertex3f(i-1,   0,  -1 * (j-1) );
+
+    //cara derecha
+    glNormal3f(1, 0, 0);
+    glVertex3f(i  ,   0,  -1 * j        );
+    glVertex3f(i,     1,  -1 * j         );
+    glVertex3f(i,     1,  -1 * (j-1)     );
+    glVertex3f(i  ,   0,  -1 * (j - 1)  );
+
+    //cara trasera
+    glNormal3f(0, 0, -1);
+    glVertex3f(i-1,     0,  -1 * (j-1) );
+    glVertex3f(i-1,     1,  -1 * (j-1) );
+    glVertex3f(i,   1,  -1 * (j-1) );
+    glVertex3f(i,   0,  -1 * (j-1) );
 
     glEnd();
 

@@ -6,7 +6,7 @@ m_(),
 densidad_(),
 celdas_(){}
 
-tablero::tablero(int n, int m, float r):
+tablero::tablero(int n, int m, float r, std::vector<int> car):
 n_(n),
 m_(m),
 densidad_(r),
@@ -23,8 +23,13 @@ celdas_(){
 
   srand(time(NULL));
 
-  for(int i = 0; i < (num-num_u); i++){
-    obstaculos_.push_back(rand() % num);
+  int i = 0;
+  while(i < (num-num_u)){
+    int pos = rand() % num;
+    if((pos != car[0]) && (pos != car[1])){
+      obstaculos_.push_back(pos);
+      i++;
+    }
   }
 
   for(int i = 0; i < obstaculos_.size(); i++){

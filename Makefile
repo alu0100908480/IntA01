@@ -1,5 +1,6 @@
+#baifo@etsii.ull.es
 #OBJS especifica que archivos tenemos que compilar
-OBJS = celda.cpp tablero.cpp main.cpp helper.cpp
+OBJS = celda.cpp tablero.cpp main.cpp car.cpp
 
 #CC especifica el compilador
 CC = g++

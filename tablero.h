@@ -10,7 +10,7 @@ class tablero{
 		std::vector<int> obstaculos_;
 	public:
 		tablero(void);
-		tablero(int,int,float);
+		tablero(int,int,float,std::vector<int>);
 		~tablero(void);
 		int& get_n(void);
 		int& get_m(void);
