@@ -8,9 +8,11 @@ const int SCREEN_FPS = 60;
 
 tablero* entorno;   // declaramos el tablero y el coche
 car* coche;
+GLuint cubo, suelo;
 
 void init_entorno(int &, int &, float &);
 void runMainLoop(int);
+void GenerateList(void);
 bool initGL(void);
 void update(void);
 void render(void);
@@ -39,6 +41,7 @@ int main(int argc, char *argv[]) {
   else{
       std::cout << "-->Las librerias gráficas se cargaron correctamente" << std::endl;
   }
+  GenerateList();
   //glutKeyboardFunc( handleKeys );   //hacemos que glut se encargue del input del usuario
 
   glutDisplayFunc( render );    //le indicamos a glut que queremos que use nuestra función como render
@@ -66,49 +69,17 @@ void runMainLoop(int val){
   glutTimerFunc( 1000 / SCREEN_FPS, runMainLoop, val );  //hacemos otra llamada 1/60 seg para tener los 60 fps
 }
 
+void GenerateList(){
+    suelo = glGenLists(1);   //se genera la lista cubo.
 
-
-bool initGL(){
-    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-    glMatrixMode( GL_PROJECTION );  //inicalizamos la matriz de proyección
-    glLoadIdentity();
-    gluPerspective(50.0f, (GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.5f, 50.0f);
-
-    GLfloat x = entorno->get_m();
-    GLfloat z = entorno->get_n();
-
-  //  gluLookAt(7.5, 12, 8, 7.5, 0, -5, 0, 1, 0);
-    gluLookAt(x/2, x-3, z-5, x/2, 0, -5, 0, 1, 0);
-
-    glMatrixMode( GL_MODELVIEW ); //inicializamos la matriz de vista de modelos
-    glLoadIdentity();
-
-    glClearColor( 0.f, 0.f, 0.f, 1.f ); //inicializamos el color del clear
-
-    GLenum error = glGetError(); //comprobamos que no haya ningún error
-    if( error != GL_NO_ERROR ){
-        printf( "Error iniciando OpenGL! %s\n", gluErrorString( error ) );
-        return false;
-    }
-    return true;
-}
-
-void update(){
-}
-
-void render(void){
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); //limpiamos el buffer
-
-
-    glMatrixMode( GL_MODELVIEW ); //reseteamos la matriz de modelos
-    glLoadIdentity();
+    glNewList(suelo, GL_COMPILE);
 
     glBegin(GL_LINES);
 
     GLfloat x = entorno->get_m();
     GLfloat z = entorno->get_n();
 
-    glColor3f(0.0f, 1.0f, 1.0f);
+    glColor3f(0.282f, 0.820f, 0.800f);
     glVertex3f(0.0f, 0.0f, 0.0f);
     glVertex3f(0.0f, 0.0f, -1 * z);
 
@@ -135,18 +106,19 @@ void render(void){
 
     glEnd(); // tenemos un grid redimensionable de cuadros de 1 x 1.
 
-    glMatrixMode( GL_MODELVIEW ); //reseteamos la matriz de modelos
-    glLoadIdentity();
+    glEndList();
 
-    glBegin(GL_QUADS);
+    cubo = glGenLists(1);   //se genera la lista cubo.
+
+    glNewList(cubo, GL_COMPILE);
+
+    glBegin(GL_QUADS); // obstáculos del mapa y el coche
 
     for(int k = 0; k < entorno->get_vec().size(); k++){
       std::vector<int> vect = entorno->get_vec();
       int dummy = entorno->get_m() * entorno->get_n();
       int j = vect[k]/entorno->get_m() +1;
-      int i = vect[k] - (j-1) * entorno->get_n() +1;
-
-      glColor3f(0.0f, 1.0f, 1.0f);
+      int i = vect[k] % entorno->get_m() +1;
       glNormal3f(0.0f, 1.0f, 0.0f);
       glVertex3f(i-1, 0.0f, -1 * (j-1));
       glVertex3f(i-1, 0.0f, -1 * j);
@@ -157,7 +129,7 @@ void render(void){
     std::vector<int> dummy = coche->get_pos();
     int i = dummy[0];
     int j = dummy[1];
-    glColor3f(1.0f, 0.2f, 0.0f);
+    glColor3f(0.863f, 0.078f, 0.235f);
 
     //cara abajo
     glNormal3f(0, -1, 0);
@@ -203,6 +175,50 @@ void render(void){
 
     glEnd();
 
+    glEndList();
+}
+
+bool initGL(){
+    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    glMatrixMode( GL_PROJECTION );  //inicalizamos la matriz de proyección
+    glLoadIdentity();
+    gluPerspective(50.0f, (GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.5f, 50.0f);
+
+    GLfloat x = entorno->get_m();
+    GLfloat z = entorno->get_n();
+
+  //  gluLookAt(7.5, 12, 8, 7.5, 0, -5, 0, 1, 0);
+    gluLookAt(x/2, x-3, z-5, x/2, 0, -5, 0, 1, 0);
+
+    glMatrixMode( GL_MODELVIEW ); //inicializamos la matriz de vista de modelos
+    glLoadIdentity();
+
+    glClearColor( 0.f, 0.f, 0.f, 1.f ); //inicializamos el color del clear
+
+    GLenum error = glGetError(); //comprobamos que no haya ningún error
+    if( error != GL_NO_ERROR ){
+        printf( "Error iniciando OpenGL! %s\n", gluErrorString( error ) );
+        return false;
+    }
+    return true;
+}
+
+void update(){
+}
+
+void render(void){
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); //limpiamos el buffer
+
+
+    glMatrixMode( GL_MODELVIEW ); //reseteamos la matriz de modelos
+    glLoadIdentity();
+
+    glCallList(suelo);
+
+    glMatrixMode( GL_MODELVIEW ); //reseteamos la matriz de modelos
+    glLoadIdentity();
+
+    glCallList(cubo);
 
    glutSwapBuffers(); //intercambia los buffers y actualiza la pantalla
 }
