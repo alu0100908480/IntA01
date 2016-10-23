@@ -7,6 +7,7 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <stdio.h>
+#include <time.h>
 #include <iostream>
 #include <iomanip>
 #include <vector>

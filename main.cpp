@@ -40,9 +40,11 @@ int main(int argc, char *argv[]) {
   }
   else{
       std::cout << "-->Las librerias gráficas se cargaron correctamente" << std::endl;
+      GenerateList(); // dibujamos todos los objetos 3d que vamos a usar en la simulación
   }
-  GenerateList();
-  //glutKeyboardFunc( handleKeys );   //hacemos que glut se encargue del input del usuario
+
+
+  glutKeyboardFunc( handleKeys );   //hacemos que glut se encargue del input del usuario
 
   glutDisplayFunc( render );    //le indicamos a glut que queremos que use nuestra función como render
 
